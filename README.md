@@ -1,2 +1,3 @@
 # WebPEncoder
+
 Swift WebP Encoder
