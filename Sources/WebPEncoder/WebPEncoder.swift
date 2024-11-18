@@ -12,7 +12,10 @@ public struct WebPEncoder: Sendable {
             throw WebPEncoderError.unexpectedProblemWithPointer
         }
         return try encode(
-            rgba: rgba,
+            rgba,
+            importer: { picturePointer, data, stride in
+                WebPPictureImportRGBA(picturePointer, data, stride)
+            },
             config: config,
             originWidth: Int(image.width),
             originHeight: Int(image.height),
@@ -20,29 +23,9 @@ public struct WebPEncoder: Sendable {
         )
     }
 
-    func encode(
-        rgba: UnsafeMutablePointer<UInt8>,
-        config: WebPEncoderConfig,
-        originWidth: Int,
-        originHeight: Int,
-        stride: Int
-    ) throws -> Data {
-        let importer: WebPPictureImporter = { picturePointer, data, stride in
-            WebPPictureImportRGBA(picturePointer, data, stride)
-        }
-        return try encode(
-            rgba,
-            importer: importer,
-            config: config,
-            originWidth: originWidth,
-            originHeight: originHeight,
-            stride: stride
-        )
-    }
-
     private func encode(
         _ dataPointer: UnsafeMutablePointer<UInt8>,
-        importer: WebPPictureImporter,
+        importer: @escaping WebPPictureImporter,
         config: WebPEncoderConfig,
         originWidth: Int,
         originHeight: Int,
@@ -58,12 +41,15 @@ public struct WebPEncoder: Sendable {
             throw WebPEncoderError.invalidParameter
         }
 
+        defer {
+            WebPPictureFree(&picture)
+        }
+
         picture.use_argb = config.lossless == .zero ? 0 : 1
         picture.width = Int32(originWidth)
         picture.height = Int32(originHeight)
 
         guard importer(&picture, dataPointer, Int32(stride)) != .zero else {
-            WebPPictureFree(&picture)
             throw WebPEncoderError.versionMismatched
         }
 
@@ -71,10 +57,6 @@ public struct WebPEncoder: Sendable {
         WebPMemoryWriterInit(&buffer)
         picture.writer = { data, size, picture in
             WebPMemoryWrite(data, size, picture)
-        }
-
-        defer {
-            WebPPictureFree(&picture)
         }
 
         try withUnsafeMutableBytes(of: &buffer) { pointer in
