@@ -43,38 +43,34 @@ public struct WebPEncoder: Sendable {
         guard WebPValidateConfig(&config) != .zero else {
             throw WebPEncoderError.invalidParameter
         }
-
-        var picture = WebPPicture()
-        guard WebPPictureInit(&picture) != .zero else {
-            throw WebPEncoderError.invalidParameter
-        }
-
-        defer {
-            WebPPictureFree(&picture)
-        }
-
-        picture.use_argb = config.lossless == .zero ? 0 : 1
-        picture.width = Int32(originWidth)
-        picture.height = Int32(originHeight)
-
-        guard importer(&picture, dataPointer, Int32(stride)) != .zero else {
-            throw WebPEncoderError.versionMismatched
-        }
-
         var buffer = WebPMemoryWriter()
-        WebPMemoryWriterInit(&buffer)
-        picture.writer = { data, size, picture in
-            WebPMemoryWrite(data, size, picture)
+        return try withUnsafeMutablePointer(to: &buffer) { pointer in
+            var picture = WebPPicture()
+            guard WebPPictureInit(&picture) != .zero else {
+                throw WebPEncoderError.invalidParameter
+            }
+            defer {
+                WebPPictureFree(&picture)
+            }
+            picture.use_argb = config.lossless == .zero ? 0 : 1
+            picture.width = Int32(originWidth)
+            picture.height = Int32(originHeight)
+            picture.writer = WebPMemoryWrite
+            picture.custom_ptr = UnsafeMutableRawPointer(pointer)
+            WebPMemoryWriterInit(pointer)
+            guard importer(&picture, dataPointer, Int32(stride)) != .zero else {
+                WebPMemoryWriterClear(pointer)
+                throw WebPEncoderError.versionMismatched
+            }
+            guard WebPEncode(&config, &picture) != .zero else {
+                WebPMemoryWriterClear(pointer)
+                throw WebPEncoderError.encodingError(.init(rawValue: picture.error_code)!)
+            }
+            return Data(
+                bytesNoCopy: pointer.pointee.mem,
+                count: pointer.pointee.size,
+                deallocator: .free
+            )
         }
-        withUnsafeMutableBytes(of: &buffer) { pointer in
-            picture.custom_ptr = pointer.baseAddress
-        }
-        guard WebPEncode(&config, &picture) != .zero else {
-            throw WebPEncoderError.encodingError(.init(rawValue: picture.error_code)!)
-        }
-
-        let data = Data(bytesNoCopy: buffer.mem, count: buffer.size, deallocator: .free)
-        WebPMemoryWriterClear(&buffer)
-        return data
     }
 }

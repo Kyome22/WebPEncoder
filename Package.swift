@@ -14,7 +14,7 @@ let package = Package(
     products: [
         .library(
             name: "WebPEncoder",
-            targets: ["WebPEncoder", "WebPBridge"]
+            targets: ["WebPEncoder"]
         ),
     ],
     targets: [
@@ -37,7 +37,7 @@ let package = Package(
         .target(
             name: "WebPBridge",
             dependencies: ["libsharpyuv", "libwebp", "libwebpdemux", "libwebpmux"],
-            publicHeadersPath: ".",
+            publicHeadersPath: "include",
             cSettings: [.headerSearchPath(".")]
         ),
         .target(

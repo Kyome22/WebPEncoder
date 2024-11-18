@@ -1,0 +1,4 @@
+module WebPBridge {
+    umbrella header "webp_bridge.h"
+    export *
+}
