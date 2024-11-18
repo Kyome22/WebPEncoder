@@ -3,29 +3,29 @@
  WebPEncoder
 
  Created by Takuto Nakamura on 2024/11/18.
- 
+
 */
 
-import libwebp
+import WebPBridge
 
-extension libwebp.WebPImageHint: @retroactive ExpressibleByIntegerLiteral {
+extension WebPBridge.WebPImageHint: @retroactive ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
         switch UInt32(value) {
-        case libwebp.WEBP_HINT_DEFAULT.rawValue:
-            self = libwebp.WEBP_HINT_DEFAULT
-        case libwebp.WEBP_HINT_PICTURE.rawValue:
-            self = libwebp.WEBP_HINT_PICTURE
-        case libwebp.WEBP_HINT_PHOTO.rawValue:
-            self = libwebp.WEBP_HINT_PHOTO
-        case libwebp.WEBP_HINT_GRAPH.rawValue:
-            self = libwebp.WEBP_HINT_GRAPH
+        case WEBP_HINT_DEFAULT.rawValue:
+            self = WEBP_HINT_DEFAULT
+        case WEBP_HINT_PICTURE.rawValue:
+            self = WEBP_HINT_PICTURE
+        case WEBP_HINT_PHOTO.rawValue:
+            self = WEBP_HINT_PHOTO
+        case WEBP_HINT_GRAPH.rawValue:
+            self = WEBP_HINT_GRAPH
         default:
             fatalError()
         }
     }
 }
 
-public enum WebPImageHint: libwebp.WebPImageHint {
+public enum WebPImageHint: WebPBridge.WebPImageHint {
     case `default` = 0
     case picture
     case photo

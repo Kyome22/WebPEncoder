@@ -14,45 +14,35 @@ let package = Package(
     products: [
         .library(
             name: "WebPEncoder",
-            targets: ["WebPEncoder"]
+            targets: ["WebPEncoder", "WebPBridge"]
         ),
     ],
     targets: [
-        .target(
+        .binaryTarget(
+            name: "libsharpyuv",
+            path: "Sources/libsharpyuv.xcframework"
+        ),
+        .binaryTarget(
             name: "libwebp",
-            path: ".",
-            exclude: [
-                "libwebp/sharpyuv/Makefile.am",
-                "libwebp/sharpyuv/libsharpyuv.pc.in",
-                "libwebp/sharpyuv/libsharpyuv.rc",
-                "libwebp/src/Makefile.am",
-                "libwebp/src/dec/Makefile.am",
-                "libwebp/src/demux/Makefile.am",
-                "libwebp/src/demux/libwebpdemux.pc.in",
-                "libwebp/src/demux/libwebpdemux.rc",
-                "libwebp/src/dsp/Makefile.am",
-                "libwebp/src/enc/Makefile.am",
-                "libwebp/src/libwebp.pc.in",
-                "libwebp/src/libwebp.rc",
-                "libwebp/src/libwebpdecoder.pc.in",
-                "libwebp/src/libwebpdecoder.rc",
-                "libwebp/src/mux/Makefile.am",
-                "libwebp/src/mux/libwebpmux.pc.in",
-                "libwebp/src/mux/libwebpmux.rc",
-                "libwebp/src/utils/Makefile.am",
-            ],
-            sources: [
-                "libwebp/src", 
-                "libwebp/sharpyuv",
-            ],
-            publicHeadersPath: "Headers",
-            cSettings: [
-                .headerSearchPath("libwebp"),
-            ]
+            path: "Sources/libwebp.xcframework"
+        ),
+        .binaryTarget(
+            name: "libwebpdemux",
+            path: "Sources/libwebpdemux.xcframework"
+        ),
+        .binaryTarget(
+            name: "libwebpmux",
+            path: "Sources/libwebpmux.xcframework"
+        ),
+        .target(
+            name: "WebPBridge",
+            dependencies: ["libsharpyuv", "libwebp", "libwebpdemux", "libwebpmux"],
+            publicHeadersPath: ".",
+            cSettings: [.headerSearchPath(".")]
         ),
         .target(
             name: "WebPEncoder",
-            dependencies: ["libwebp"],
+            dependencies: ["WebPBridge"],
             swiftSettings: swiftSettings
         ),
         .testTarget(

@@ -1,6 +1,14 @@
+/*
+ WebPEncoder.swift
+ WebPEncoder
+
+ Created by Takuto Nakamura on 2024/11/18.
+
+*/
+
 import CoreGraphics
 import Foundation
-import libwebp
+import WebPBridge
 
 public struct WebPEncoder: Sendable {
     typealias WebPPictureImporter = (UnsafeMutablePointer<WebPPicture>, UnsafeMutablePointer<UInt8>, Int32) -> Int32

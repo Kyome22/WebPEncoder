@@ -3,10 +3,10 @@
  WebPEncoder
 
  Created by Takuto Nakamura on 2024/11/18.
- 
+
 */
 
-import libwebp
+import WebPBridge
 
 public enum WebPEncoderError: Error {
     case invalidParameter
