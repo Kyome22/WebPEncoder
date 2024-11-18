@@ -7,12 +7,7 @@ public struct WebPEncoder: Sendable {
 
     public init() {}
 
-    public func encode(
-        _ image: CGImage,
-        config: WebPEncoderConfig,
-        width: Int = 0,
-        height: Int = 0
-    ) throws -> Data {
+    public func encode(_ image: CGImage, config: WebPEncoderConfig) throws -> Data {
         guard let rgba = image.baseAddress else {
             throw WebPEncoderError.unexpectedProblemWithPointer
         }
@@ -30,12 +25,10 @@ public struct WebPEncoder: Sendable {
         config: WebPEncoderConfig,
         originWidth: Int,
         originHeight: Int,
-        stride: Int,
-        resizeWidth: Int = 0,
-        resizeHeight: Int = 0
+        stride: Int
     ) throws -> Data {
         let importer: WebPPictureImporter = { picturePointer, data, stride in
-            WebPPictureImportRGB(picturePointer, data, stride)
+            WebPPictureImportRGBA(picturePointer, data, stride)
         }
         return try encode(
             rgba,
@@ -53,9 +46,7 @@ public struct WebPEncoder: Sendable {
         config: WebPEncoderConfig,
         originWidth: Int,
         originHeight: Int,
-        stride: Int,
-        resizeWidth: Int = 0,
-        resizeHeight: Int = 0
+        stride: Int
     ) throws -> Data {
         var config = config.rawValue
         guard WebPValidateConfig(&config) != .zero else {
@@ -74,12 +65,6 @@ public struct WebPEncoder: Sendable {
         guard importer(&picture, dataPointer, Int32(stride)) != .zero else {
             WebPPictureFree(&picture)
             throw WebPEncoderError.versionMismatched
-        }
-
-        if resizeWidth > 0 && resizeWidth > 0 {
-            guard WebPPictureRescale(&picture, Int32(resizeWidth), Int32(resizeHeight)) != .zero else {
-                throw WebPEncoderError.encodingError(.outOfMemory)
-            }
         }
 
         var buffer = WebPMemoryWriter()
