@@ -16,7 +16,7 @@ public enum WebPPreset {
     case icon
     case text
 
-    func config(quality: Float) -> WebPConfig {
+    func config(quality: Float, multithread: Bool) -> WebPConfig {
         let quality = min(100, max(0, 100 * quality))
         var config = WebPConfig()
         let preset = switch self {
@@ -28,6 +28,7 @@ public enum WebPPreset {
         case .text:    WEBP_PRESET_TEXT
         }
         WebPConfigPreset(&config, preset, quality)
+        config.thread_level = multithread ? 1 : 0
         return config
     }
 }

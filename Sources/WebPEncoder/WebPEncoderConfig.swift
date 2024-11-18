@@ -33,7 +33,7 @@ public struct WebPEncoderConfig: RawRepresentable {
     public var partitions: WebPImagePartition = .partition0
     public var partitionLimit: Int32 // 0~100
     public var emulateJPEGSize: Bool
-    public var threadLevel: Int32
+    public var multithread: Bool
     public var lowMemory: Bool
     public var nearLossless: Int32 = 100 // 0~100
     public var exact: Int32
@@ -65,7 +65,7 @@ public struct WebPEncoderConfig: RawRepresentable {
             partitions: partitions.rawValue,
             partition_limit: partitionLimit,
             emulate_jpeg_size: emulateJPEGSize ? 1 : 0,
-            thread_level: threadLevel,
+            thread_level: multithread ? 1 : 0,
             low_memory: lowMemory ? 1 : 0,
             near_lossless: nearLossless,
             exact: exact,
@@ -98,7 +98,7 @@ public struct WebPEncoderConfig: RawRepresentable {
         partitions = .init(rawValue: config.partitions)!
         partitionLimit = config.partitions
         emulateJPEGSize = config.emulate_jpeg_size != .zero
-        threadLevel = config.thread_level
+        multithread = config.thread_level != .zero
         lowMemory = config.low_memory != .zero
         nearLossless = config.near_lossless
         exact = config.exact
@@ -108,7 +108,7 @@ public struct WebPEncoderConfig: RawRepresentable {
         qmax = config.qmax
     }
 
-    public static func preset(_ preset: WebPPreset, quality: Float) -> WebPEncoderConfig {
-        WebPEncoderConfig(rawValue: preset.config(quality: quality))!
+    public static func preset(_ preset: WebPPreset, quality: Float, multithread: Bool) -> WebPEncoderConfig {
+        WebPEncoderConfig(rawValue: preset.config(quality: quality, multithread: multithread))!
     }
 }
