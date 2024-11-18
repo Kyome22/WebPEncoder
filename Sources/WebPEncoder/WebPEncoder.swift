@@ -58,14 +58,15 @@ public struct WebPEncoder: Sendable {
         picture.writer = { data, size, picture in
             WebPMemoryWrite(data, size, picture)
         }
-
-        try withUnsafeMutableBytes(of: &buffer) { pointer in
+        withUnsafeMutableBytes(of: &buffer) { pointer in
             picture.custom_ptr = pointer.baseAddress
-            guard WebPEncode(&config, &picture) != .zero else {
-                throw WebPEncoderError.encodingError(.init(rawValue: picture.error_code)!)
-            }
+        }
+        guard WebPEncode(&config, &picture) != .zero else {
+            throw WebPEncoderError.encodingError(.init(rawValue: picture.error_code)!)
         }
 
-        return Data(bytesNoCopy: buffer.mem, count: buffer.size, deallocator: .free)
+        let data = Data(bytesNoCopy: buffer.mem, count: buffer.size, deallocator: .free)
+        WebPMemoryWriterClear(&buffer)
+        return data
     }
 }
