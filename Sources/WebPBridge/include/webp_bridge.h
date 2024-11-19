@@ -2,4 +2,4 @@
 #include "types.h"
 #include "demux.h"
 #include "mux.h"
-#include "dummy.hxx"
+#include "dummy.h"

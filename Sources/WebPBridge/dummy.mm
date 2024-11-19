@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "dummy.hxx"
+#import "dummy.h"
 
 @implementation Dummy
 @end

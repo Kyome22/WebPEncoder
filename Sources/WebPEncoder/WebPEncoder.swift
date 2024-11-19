@@ -11,24 +11,21 @@ import Foundation
 import WebPBridge
 
 public struct WebPEncoder: Sendable {
-    typealias WebPPictureImporter = (UnsafeMutablePointer<WebPPicture>, UnsafeMutablePointer<UInt8>, Int32) -> Int32
+    typealias WebPPictureImporter = @Sendable (UnsafeMutablePointer<WebPPicture>?, UnsafePointer<UInt8>?, Int32) -> Int32
 
     public init() {}
 
-    public func encode(_ image: CGImage, config: WebPEncoderConfig) throws -> Data {
-        guard let rgba = image.baseAddress else {
-            throw WebPEncoderError.unexpectedProblemWithPointer
+    private func handlableImage(_ image: CGImage) throws -> (CGImage, CGImage.PixelFormat) {
+        switch image.pixelFormat {
+        case let .some(pixelFormat):
+            return (image, pixelFormat)
+        case .none:
+            guard let rgbImage = image.sRGB(),
+                  let pixelFormat = rgbImage.pixelFormat else {
+                throw WebPEncoderError.versionMismatched
+            }
+            return (rgbImage, pixelFormat)
         }
-        return try encode(
-            rgba,
-            importer: { picturePointer, data, stride in
-                WebPPictureImportRGBA(picturePointer, data, stride)
-            },
-            config: config,
-            originWidth: Int(image.width),
-            originHeight: Int(image.height),
-            stride: image.bytesPerRow
-        )
     }
 
     private func encode(
@@ -72,5 +69,30 @@ public struct WebPEncoder: Sendable {
                 deallocator: .free
             )
         }
+    }
+
+    public func encode(_ image: CGImage, config: WebPEncoderConfig) throws -> Data {
+        let (image, pixelFormat) = try handlableImage(image)
+        let importerMethod: WebPPictureImporter = switch pixelFormat {
+        case .RGB: WebPPictureImportRGB
+        case .BGR: WebPPictureImportBGR
+        case .RGBA: WebPPictureImportRGBA
+        case .BGRA: WebPPictureImportBGRA
+        case .RGBX: WebPPictureImportRGBX
+        case .BGRX: WebPPictureImportBGRX
+        }
+        guard let address = image.baseAddress else {
+            throw WebPEncoderError.unexpectedProblemWithPointer
+        }
+        return try encode(
+            address,
+            importer: { picturePointer, data, stride in
+                importerMethod(picturePointer, data, stride)
+            },
+            config: config,
+            originWidth: Int(image.width),
+            originHeight: Int(image.height),
+            stride: image.bytesPerRow
+        )
     }
 }
