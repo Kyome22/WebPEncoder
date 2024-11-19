@@ -1,6 +1,16 @@
-import Testing
+import AppKit
+import XCTest
 @testable import WebPEncoder
 
-@Test func example() async throws {
-    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+final class WebPEncoderTests: XCTestCase {
+    func test_encoder() throws {
+        let sut = WebPEncoder()
+        guard let url = Bundle.module.url(forResource: "sample", withExtension: "jpg"),
+              let nsImage = NSImage(contentsOf: url),
+              let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            XCTFail()
+            return
+        }
+        XCTAssertNoThrow(try sut.encode(cgImage, config: .preset(.picture, quality: 0.8, multithread: false)))
+    }
 }

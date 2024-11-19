@@ -26,17 +26,9 @@ let package = Package(
             name: "libwebp",
             path: "Sources/libwebp.xcframework"
         ),
-        .binaryTarget(
-            name: "libwebpdemux",
-            path: "Sources/libwebpdemux.xcframework"
-        ),
-        .binaryTarget(
-            name: "libwebpmux",
-            path: "Sources/libwebpmux.xcframework"
-        ),
         .target(
             name: "WebPBridge",
-            dependencies: ["libsharpyuv", "libwebp", "libwebpdemux", "libwebpmux"],
+            dependencies: ["libsharpyuv", "libwebp"],
             publicHeadersPath: "include",
             cSettings: [.headerSearchPath(".")]
         ),
@@ -48,6 +40,7 @@ let package = Package(
         .testTarget(
             name: "WebPEncoderTests",
             dependencies: ["WebPEncoder"],
+            resources: [.process("Resources/sample.jpg")],
             swiftSettings: swiftSettings
         ),
     ]
