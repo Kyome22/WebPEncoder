@@ -7,7 +7,7 @@ This library using [libwebp](https://github.com/webmproject/libwebp).
 ## Requirements
 
 - Development with Xcode 16.0+
-- Written in Swift 6.0
+- Written in Swift 6.1
 - swift-tools-version: 6.0
 - Compatible with macOS 14.0+
 

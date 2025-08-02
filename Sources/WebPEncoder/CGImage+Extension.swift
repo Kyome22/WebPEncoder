@@ -54,7 +54,7 @@ extension CGImage {
         }
     }
 
-    // Encodableなものだけに絞る
+    // Filtering only Encodable
     enum PixelFormat {
         case RGB
         case BGR

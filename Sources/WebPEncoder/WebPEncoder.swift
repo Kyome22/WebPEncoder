@@ -90,8 +90,8 @@ public struct WebPEncoder: Sendable {
                 importerMethod(picturePointer, data, stride)
             },
             config: config,
-            originWidth: Int(image.width),
-            originHeight: Int(image.height),
+            originWidth: image.width,
+            originHeight: image.height,
             stride: image.bytesPerRow
         )
     }
