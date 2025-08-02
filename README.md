@@ -2,6 +2,8 @@
 
 Swift WebP Encoder
 
+This library using [libwebp](https://github.com/webmproject/libwebp).
+
 ## Requirements
 
 - Development with Xcode 16.0+
